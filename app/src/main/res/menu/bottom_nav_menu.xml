@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_prices"
+        android:icon="@drawable/ic_alarm"
+        android:title="Reminder" />
+
+    <item
+        android:id="@+id/nav_shopping_list"
+        android:icon="@drawable/ic_shopping_cart"
+        android:title="Shopping List" />
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_account"
+        android:title="Profile" />
+</menu>
