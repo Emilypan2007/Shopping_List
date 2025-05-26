@@ -23,14 +23,14 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Calendar;
 
-public class PricesFragment extends Fragment {
+public class NotificationFragment extends Fragment {
     private Button setReminderButton;
     private FirebaseUser currentUser;
     private DatabaseReference usersRef;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_prices, container, false);
+        View view= inflater.inflate(R.layout.activity_notification_fragment, container, false);
 
         setReminderButton = view.findViewById(R.id.setReminderButton);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();

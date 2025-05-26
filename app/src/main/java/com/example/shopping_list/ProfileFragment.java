@@ -25,20 +25,17 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.InputStream;
-
 
 public class ProfileFragment extends Fragment {
-    private static final int PICK_IMAGE = 1;
 
-    private ImageView profilePicture;
+
     private TextInputEditText nameEditText, emailEditText;
-    private Button changePictureButton, saveButton,setReminderButton;
+    private Button  saveButton;
 
 
     private FirebaseAuth auth;
     private DatabaseReference userDatabaseRef;
-    private Uri imageUri;
+   
 
     @Nullable
     @Override
@@ -46,10 +43,8 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         // Initialize Views
-        profilePicture = view.findViewById(R.id.profilePicture);
         nameEditText = view.findViewById(R.id.nameEditText);
         emailEditText = view.findViewById(R.id.emailEditText);
-        changePictureButton = view.findViewById(R.id.changePictureButton);
         saveButton = view.findViewById(R.id.saveButton);
 
         // Firebase Setup
@@ -62,7 +57,6 @@ public class ProfileFragment extends Fragment {
 
 
         // Set Click Listeners
-        changePictureButton.setOnClickListener(v -> openGallery());
         saveButton.setOnClickListener(v -> saveUserData());
 
         return view;
@@ -88,25 +82,8 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, PICK_IMAGE);
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE && resultCode == getActivity().RESULT_OK && data != null) {
-            imageUri = data.getData();
-            try {
-                InputStream inputStream = getActivity().getContentResolver().openInputStream(imageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                profilePicture.setImageBitmap(bitmap);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 
     private void saveUserData() {
         String fullName = nameEditText.getText().toString().trim();
@@ -125,7 +102,5 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getActivity(), "Name cannot be empty", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 }

@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
             } else if (itemId == R.id.nav_prices) {
-                selectedFragment = new PricesFragment();
+                selectedFragment = new NotificationFragment();
             }
             return loadFragment(selectedFragment);
         });

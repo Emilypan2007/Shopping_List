@@ -16,8 +16,11 @@
         android:theme="@style/Theme.Shopping_List"
         tools:targetApi="31">
         <activity
+            android:name=".NotificationFragment"
+            android:exported="false" />
+        <activity
             android:name=".Opening"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,8 +44,7 @@
             android:exported="false" />
         <activity
             android:name=".SignUp"
-            android:exported="false"/>
-
+            android:exported="false" />
         <activity
             android:name=".Login"
             android:exported="false" />

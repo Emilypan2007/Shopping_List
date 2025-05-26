@@ -6,26 +6,6 @@
     android:padding="12dp"
     android:background="@android:color/white">
 
-    <!-- Product Image -->
-    <ImageView
-        android:id="@+id/itemImageView"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginEnd="12dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/ic_launcher_foreground"
-        android:background="@android:color/darker_gray" />
-
-    <!-- Image Button to Add/Change Image -->
-    <ImageButton
-        android:id="@+id/addImageButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="12dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@android:drawable/ic_menu_camera"
-        android:contentDescription="Add Image" />
-
     <!-- Item Details (Name, Quantity, Remark) -->
     <LinearLayout
         android:layout_width="0dp"
