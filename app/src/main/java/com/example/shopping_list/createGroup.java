@@ -23,6 +23,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Activity for creating a new group.
+ * Allows the user to set a group name, description, and add members by user ID.
+ * Saves the group to Firebase Realtime Database and updates each user's group list.
+ */
 public class createGroup extends AppCompatActivity {
     private TextInputEditText groupNameEditText, groupDescriptionEditText;
     private Button addMembersButton, createGroupButton;
@@ -34,6 +39,12 @@ public class createGroup extends AppCompatActivity {
     private ArrayList<String> membersList = new ArrayList<>();
     private String creatorId;
 
+    /**
+     * Called when the activity is first created.
+     * Initializes Firebase, binds UI views, and sets click listeners.
+     *
+     * @param savedInstanceState The saved instance state bundle.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,13 +59,13 @@ public class createGroup extends AppCompatActivity {
         // Initialize Firebase references
         mAuth = FirebaseAuth.getInstance();
         groupsDatabase = FirebaseDatabase.getInstance().getReference("Groups");
-        groupsRef = FirebaseDatabase.getInstance().getReference("Groups");  // הוספת הגדרה ל-groupsRef
+        groupsRef = FirebaseDatabase.getInstance().getReference("Groups");
 
-        // Get current user
+        // Get current user and add them as the first member
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             creatorId = currentUser.getUid();
-            membersList.add(creatorId); // Add creator to the members list
+            membersList.add(creatorId);
         }
 
         // Bind views
@@ -63,18 +74,23 @@ public class createGroup extends AppCompatActivity {
         addMembersButton = findViewById(R.id.addMembersButton);
         createGroupButton = findViewById(R.id.createGroupButton);
 
-        // Set up buttons
+        // Set up button click actions
         addMembersButton.setOnClickListener(v -> addMembers());
         createGroupButton.setOnClickListener(v -> createGroup());
     }
 
+    /**
+     * Updates the list of groups for a specific user in Firebase.
+     *
+     * @param userId  The user ID to update.
+     * @param groupId The group ID to add.
+     */
     private void updateUserGroups(String userId, String groupId) {
         DatabaseReference userGroupsRef = FirebaseDatabase.getInstance()
                 .getReference("Users")
                 .child(userId)
                 .child("groups");
 
-        // הוספת מזהה הקבוצה לרשימה
         userGroupsRef.child(groupId).setValue(true).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Group added to user's group list.", Toast.LENGTH_SHORT).show();
@@ -84,6 +100,10 @@ public class createGroup extends AppCompatActivity {
         });
     }
 
+    /**
+     * Opens a dialog to enter and add a member to the group using their user ID.
+     * Validates the ID and checks Firebase to ensure the user exists.
+     */
     private void addMembers() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add Member");
@@ -105,10 +125,7 @@ public class createGroup extends AppCompatActivity {
                 usersDatabase.child(userId).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult().exists()) {
                         membersList.add(userId);
-
-                        // עדכון רשימת הקבוצות של המשתמש
-                        updateUserGroups(userId, creatorId);  // עדכון קבוצת המשתמש
-
+                        updateUserGroups(userId, creatorId);  // Update user's group list
                         Toast.makeText(this, "User added to the group!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(this, "User ID not found!", Toast.LENGTH_SHORT).show();
@@ -121,6 +138,10 @@ public class createGroup extends AppCompatActivity {
         builder.create().show();
     }
 
+    /**
+     * Creates a new group in Firebase with the given name, description, and member list.
+     * Adds the group ID to each member's "groups" list.
+     */
     private void createGroup() {
         String groupName = groupNameEditText.getText().toString().trim();
         String groupDescription = groupDescriptionEditText.getText().toString().trim();
@@ -131,31 +152,19 @@ public class createGroup extends AppCompatActivity {
             return;
         }
 
-        // Create a unique shopping list ID
         String shoppingListId = UUID.randomUUID().toString();
+        String groupId = groupsRef.push().getKey();
 
+        Group newGroup = new Group(groupId, groupName, groupDescription, membersList, creatorId, shoppingListId);
 
-        String groupId = groupsRef.push().getKey(); // יצירת מזהה ייחודי לקבוצה
-        // מזהה המשתמש היוצר כבר הוגדר כ-creatorId
-
-        // יצירת אובייקט הקבוצה
-        Group newGroup = new Group(groupId, groupName, groupDescription, membersList, creatorId,shoppingListId);
-
-
-        // שמירת הקבוצה בבסיס הנתונים
         groupsRef.child(groupId).setValue(newGroup).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                // הוספת מזהה הקבוצה למשתמש היוצר
                 updateUserGroups(creatorId, groupId);
-
-                // הוספת מזהה הקבוצה לכל משתמש ברשימת החברים
                 for (String memberId : membersList) {
                     updateUserGroups(memberId, groupId);
                 }
 
                 Toast.makeText(createGroup.this, "Group created successfully!", Toast.LENGTH_SHORT).show();
-
-                // מעבר למסך הקבוצות
                 Intent intent = new Intent(createGroup.this, groups.class);
                 startActivity(intent);
                 finish();

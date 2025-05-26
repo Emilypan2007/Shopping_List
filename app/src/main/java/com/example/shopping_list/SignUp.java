@@ -21,7 +21,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import java.security.MessageDigest;
 
+/**
+ * Activity responsible for user registration (sign up).
+ * It collects user details, validates input, registers the user with Firebase Authentication,
+ * and saves user data (with hashed password) in Firebase Realtime Database.
+ * Also provides navigation to the login screen.
+ *
+ * @author Emily Panfilov
+ * @version 1.0
+ * @since 2025-01-25
+ */
 public class SignUp extends AppCompatActivity {
+
     private TextInputEditText fullNameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
     private Button signUpButton;
     private TextView loginRedirectTextView;
@@ -29,6 +40,13 @@ public class SignUp extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference databaseReference;
 
+    /**
+     * Called when the activity is starting.
+     * Initializes UI components, Firebase instances, and sets listeners for button clicks.
+     * Enables edge-to-edge display with padding for system bars.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down then this Bundle contains the data it most recently supplied.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,17 +67,20 @@ public class SignUp extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
         loginRedirectTextView = findViewById(R.id.loginRedirectTextView);
 
-
         signUpButton.setOnClickListener(v -> registerUser());
 
         loginRedirectTextView.setOnClickListener(v -> {
             Intent intent = new Intent(SignUp.this, Login.class);
             startActivity(intent);
         });
-
-
     }
-    private void registerUser(){
+
+    /**
+     * Validates user input and attempts to register a new user.
+     * On success, stores the user info with hashed password in Firebase Realtime Database.
+     * Provides user feedback via Toast messages.
+     */
+    private void registerUser() {
         String fullName = fullNameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
@@ -96,8 +117,7 @@ public class SignUp extends AppCompatActivity {
                         if (firebaseUser != null) {
                             String userId = firebaseUser.getUid();
                             String hashedPassword = hashPassword(password);
-                            User user = new User(userId, fullName, email,hashedPassword,"");
-
+                            User user = new User(userId, fullName, email, hashedPassword, "");
 
                             databaseReference.child(userId).setValue(user)
                                     .addOnCompleteListener(saveTask -> {
@@ -116,10 +136,24 @@ public class SignUp extends AppCompatActivity {
                     }
                 });
     }
+
+    /**
+     * Validates the email format.
+     *
+     * @param email The email string to validate.
+     * @return true if email is non-empty and matches email pattern; false otherwise.
+     */
     private boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
+    /**
+     * Hashes the given password using SHA-256 algorithm.
+     *
+     * @param password The plain text password to hash.
+     * @return The hashed password as a hexadecimal string.
+     * @throws RuntimeException if hashing algorithm is not found or any other error occurs.
+     */
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -133,7 +167,4 @@ public class SignUp extends AppCompatActivity {
             throw new RuntimeException("Error hashing password", e);
         }
     }
-
-
-
 }

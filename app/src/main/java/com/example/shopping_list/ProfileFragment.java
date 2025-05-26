@@ -1,18 +1,10 @@
 package com.example.shopping_list;
 
-
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,18 +17,26 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-
+/**
+ * Fragment that displays and allows editing of the user's profile information,
+ * such as full name and email.
+ */
 public class ProfileFragment extends Fragment {
 
-
     private TextInputEditText nameEditText, emailEditText;
-    private Button  saveButton;
-
+    private Button saveButton;
 
     private FirebaseAuth auth;
     private DatabaseReference userDatabaseRef;
-   
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     *
+     * @param inflater           The LayoutInflater object that can be used to inflate any views.
+     * @param container          The parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,47 +52,49 @@ public class ProfileFragment extends Fragment {
         FirebaseUser currentUser = auth.getCurrentUser();
         userDatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
 
-        // Load User Data
+        // Load user data from Firebase and populate fields
         loadUserData();
 
-
-        // Set Click Listeners
+        // Save button listener
         saveButton.setOnClickListener(v -> saveUserData());
 
         return view;
     }
 
+    /**
+     * Loads the user's profile data (email and full name) from Firebase
+     * and populates the corresponding fields in the UI.
+     */
     private void loadUserData() {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-            // Load email
+            // Load email from Firebase Auth
             emailEditText.setText(currentUser.getEmail());
 
-            // Load other user data (like fullName) from Firebase
+            // Load full name from Realtime Database
             userDatabaseRef.child("fullName").get().addOnCompleteListener(task -> {
                 if (task.isSuccessful() && task.getResult() != null) {
                     String fullName = task.getResult().getValue(String.class);
                     if (fullName != null) {
                         nameEditText.setText(fullName);
                     } else {
-                        nameEditText.setText(""); // If no name is saved, clear the field
+                        nameEditText.setText(""); // Clear if no name found
                     }
                 }
             });
         }
     }
 
-
-
-
+    /**
+     * Saves the user's full name to Firebase Realtime Database.
+     * Displays a success or failure Toast message based on the result.
+     */
     private void saveUserData() {
         String fullName = nameEditText.getText().toString().trim();
 
         if (!fullName.isEmpty()) {
-            // Save fullName to Firebase
             userDatabaseRef.child("fullName").setValue(fullName).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    // Show a temporary success message
                     Toast.makeText(getActivity(), "Data saved successfully", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getActivity(), "Failed to save data", Toast.LENGTH_SHORT).show();
@@ -102,5 +104,4 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getActivity(), "Name cannot be empty", Toast.LENGTH_SHORT).show();
         }
     }
-
 }

@@ -25,6 +25,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This activity displays the list of groups the current user is part of.
+ * Users can create new groups, view existing ones, or delete a group.
+ */
 public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupClickListener {
 
     private RecyclerView groupsRecyclerView;
@@ -33,11 +37,17 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
     private FirebaseAuth mAuth;
     private DatabaseReference groupsDatabase;
 
+    /**
+     * Initializes the activity, sets up UI elements, and loads groups for the logged-in user.
+     *
+     * @param savedInstanceState Saved state of the activity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_groups);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -50,19 +60,21 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
         mAuth = FirebaseAuth.getInstance();
         groupsDatabase = FirebaseDatabase.getInstance().getReference("Groups");
 
-        // Set up RecyclerView
+        // Set up RecyclerView with layout manager and adapter
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new GroupsAdapter(groupsList, this);
         groupsRecyclerView.setAdapter(adapter);
 
-        // Fetch user groups from Firebase and update the RecyclerView
+        // Load groups for the current user
         fetchUserGroups();
 
+        // Navigate to create group screen
         createGroupButton.setOnClickListener(v -> {
             Intent intent = new Intent(groups.this, createGroup.class);
             startActivity(intent);
         });
 
+        // Set long-click listener for deleting a group
         adapter.setOnGroupLongClickListener(group -> {
             new AlertDialog.Builder(this)
                     .setTitle("Delete Group")
@@ -73,11 +85,15 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
         });
     }
 
+    /**
+     * Fetches the list of group IDs associated with the current user and retrieves their details.
+     */
     private void fetchUserGroups() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             DatabaseReference userGroupsRef = FirebaseDatabase.getInstance().getReference("Users")
                     .child(currentUser.getUid()).child("groups");
+
             userGroupsRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -96,6 +112,11 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
         }
     }
 
+    /**
+     * Retrieves full group details from Firebase using group ID.
+     *
+     * @param groupId The ID of the group to retrieve.
+     */
     private void getGroupDetails(String groupId) {
         groupsDatabase.child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -114,15 +135,26 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
         });
     }
 
+    /**
+     * Handles click event when a group item is selected.
+     * Opens the main shopping list screen associated with the group.
+     *
+     * @param group The selected group object.
+     */
     @Override
     public void onGroupClick(Group group) {
-        // Pass the groupId and shoppingListId to the next screen
         Intent intent = new Intent(groups.this, MainActivity.class);
         intent.putExtra("groupId", group.getGroupId());
-        intent.putExtra("shoppingListId", group.getShoppingListId());  // Passing the shopping list ID
+        intent.putExtra("shoppingListId", group.getShoppingListId());
         startActivity(intent);
     }
 
+    /**
+     * Deletes the selected group from Firebase, removes it from the user's group list,
+     * and deletes its associated shopping list.
+     *
+     * @param group The group to be deleted.
+     */
     private void deleteGroup(Group group) {
         String groupId = group.getGroupId();
         String shoppingListId = group.getShoppingListId();
@@ -132,24 +164,23 @@ public class groups extends AppCompatActivity implements GroupsAdapter.OnGroupCl
             return;
         }
 
-        // Delete group from "Groups" node
+        // Remove group from "Groups" node
         groupsDatabase.child(groupId).removeValue()
                 .addOnSuccessListener(aVoid -> {
                     FirebaseUser currentUser = mAuth.getCurrentUser();
                     if (currentUser != null) {
-                        // Delete group from user's list of groups
+                        // Remove group from user's personal group list
                         DatabaseReference userGroupsRef = FirebaseDatabase.getInstance().getReference("Users")
                                 .child(currentUser.getUid()).child("groups").child(groupId);
 
                         userGroupsRef.removeValue()
                                 .addOnSuccessListener(aVoid1 -> {
-                                    // Delete associated shopping list
+                                    // Remove associated shopping list
                                     DatabaseReference shoppingListsRef = FirebaseDatabase.getInstance().getReference("ShoppingLists")
                                             .child(shoppingListId);
 
                                     shoppingListsRef.removeValue()
                                             .addOnSuccessListener(aVoid2 -> {
-                                                // Refresh the groups list and notify adapter
                                                 groupsList.remove(group);
                                                 adapter.notifyDataSetChanged();
                                                 Toast.makeText(groups.this, "Group deleted successfully!", Toast.LENGTH_SHORT).show();

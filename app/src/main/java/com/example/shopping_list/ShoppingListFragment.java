@@ -26,9 +26,22 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Fragment that displays and manages a shared shopping list for a given group.
+ * Allows users to add, display, and delete items in the shopping list stored in Firebase Realtime Database.
+ * The shopping list is tied to a specific group identified by groupId.
+ *
+ * Items include name, quantity, and an optional remark.
+ *
+ * Navigation includes a back button to exit this fragment and return to the Group activity.
+ *
+ * @author Emily Panfilov
+ * @version 1.0
+ * @since 2025-01-25
+ */
 public class ShoppingListFragment extends Fragment {
 
-    private EditText itemNameEditText, itemQuantityEditText,itemRemarkEditText;
+    private EditText itemNameEditText, itemQuantityEditText, itemRemarkEditText;
     private Button addItemButton;
     private RecyclerView shoppingListRecyclerView;
     private ImageButton backButton;
@@ -40,11 +53,25 @@ public class ShoppingListFragment extends Fragment {
     private DatabaseReference shoppingListsDatabase;
     private DatabaseReference groupsDatabase;
 
-
+    /**
+     * Constructor for the fragment that takes the groupId.
+     *
+     * @param groupId The unique identifier of the group whose shopping list will be managed.
+     */
     public ShoppingListFragment(String groupId) {
         this.groupId = groupId;
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * Initializes UI elements, sets up RecyclerView and adapters, Firebase references,
+     * listeners for adding items and back button, and loads existing shopping list from Firebase.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
+     * @return The View for the fragment's UI.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,10 +79,10 @@ public class ShoppingListFragment extends Fragment {
 
         itemNameEditText = view.findViewById(R.id.itemNameEditText);
         itemQuantityEditText = view.findViewById(R.id.itemQuantityEditText);
+        itemRemarkEditText = view.findViewById(R.id.itemRemarkEditText);
         addItemButton = view.findViewById(R.id.addItemButton);
         shoppingListRecyclerView = view.findViewById(R.id.shoppingListRecyclerView);
         backButton = view.findViewById(R.id.backButton);
-        itemRemarkEditText = view.findViewById(R.id.itemRemarkEditText);
 
         items = new ArrayList<>();
         adapter = new ShoppingListAdapter(items, item -> deleteItemFromDatabase(item));
@@ -80,6 +107,13 @@ public class ShoppingListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Adds a new item to the shopping list.
+     * Validates input fields for name and quantity.
+     * Adds the item to the local list and notifies adapter.
+     * Saves the item to Firebase under the group's shopping list.
+     * Clears the input fields after adding.
+     */
     private void addItemToShoppingList() {
         String itemName = itemNameEditText.getText().toString().trim();
         String itemQuantityStr = itemQuantityEditText.getText().toString().trim();
@@ -106,6 +140,13 @@ public class ShoppingListFragment extends Fragment {
         itemRemarkEditText.setText("");
     }
 
+    /**
+     * Saves a given item to the Firebase Realtime Database.
+     * Retrieves or creates the shopping list ID for the group,
+     * then saves the item under that shopping list.
+     *
+     * @param item The item to save in the database.
+     */
     private void saveItemToDatabase(Item item) {
         groupsDatabase.child(groupId).child("shoppingListId").get().addOnSuccessListener(snapshot -> {
             String shoppingListId;
@@ -124,6 +165,10 @@ public class ShoppingListFragment extends Fragment {
         }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to retrieve shopping list ID.", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Loads the shopping list items from Firebase and updates the UI.
+     * Listens for changes on the shopping list node and updates the local list accordingly.
+     */
     private void loadShoppingListFromDatabase() {
         groupsDatabase.child(groupId).child("shoppingListId").get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
@@ -153,6 +198,11 @@ public class ShoppingListFragment extends Fragment {
         }).addOnFailureListener(e -> Toast.makeText(getContext(), "Failed to retrieve shopping list ID.", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Deletes an item from the Firebase database based on its key.
+     *
+     * @param item The item to be deleted.
+     */
     private void deleteItemFromDatabase(Item item) {
         groupsDatabase.child(groupId).child("shoppingListId").get().addOnSuccessListener(snapshot -> {
             if (snapshot.exists()) {
