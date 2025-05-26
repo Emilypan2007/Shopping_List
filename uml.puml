@@ -1,0 +1,257 @@
+@startuml
+class com.example.shopping_list.SignUp {
+- TextInputEditText fullNameEditText
+- Button signUpButton
+- TextView loginRedirectTextView
+- FirebaseAuth mAuth
+- DatabaseReference databaseReference
+# void onCreate(Bundle)
+- void registerUser()
+- boolean isValidEmail(String)
+- String hashPassword(String)
+}
+
+
+class com.example.shopping_list.Login {
+- FirebaseAuth mAuth
+- TextInputEditText emailEditText
+- Button loginButton
+- TextView signUpTextView
+- DatabaseReference usersRef
+# void onCreate(Bundle)
+- void loginUser()
+}
+
+
+class com.example.shopping_list.PricesFragment {
+- Button setReminderButton
+- FirebaseUser currentUser
+- DatabaseReference usersRef
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void openTimePicker()
+- void saveReminderToFirebase(long)
+- void setAlarm(long)
+}
+
+
+class com.example.shopping_list.groups {
+- RecyclerView groupsRecyclerView
+- GroupsAdapter adapter
+- List<Group> groupsList
+- FirebaseAuth mAuth
+- DatabaseReference groupsDatabase
+# void onCreate(Bundle)
+- void fetchUserGroups()
+- void getGroupDetails(String)
++ void onGroupClick(Group)
+- void deleteGroup(Group)
+}
+
+
+class com.example.shopping_list.ShoppingListFragment {
+- EditText itemNameEditText
+- Button addItemButton
+- RecyclerView shoppingListRecyclerView
+- ImageButton backButton
+- ArrayList<Item> items
+- ShoppingListAdapter adapter
+- String groupId
+- DatabaseReference shoppingListsDatabase
+- DatabaseReference groupsDatabase
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void addItemToShoppingList()
+- void saveItemToDatabase(Item)
+- void loadShoppingListFromDatabase()
+- void deleteItemFromDatabase(Item)
+}
+
+
+class com.example.shopping_list.ReminderReceiver {
++ void onReceive(Context,Intent)
+- void showNotification(Context)
+}
+
+class com.example.shopping_list.ShoppingListAdapter {
+- List<Item> itemList
+- OnItemClickListener listener
++ ViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(ViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.shopping_list.ShoppingListAdapter$OnItemClickListener {
+~ void onItemClick(Item)
+}
+
+class com.example.shopping_list.ShoppingListAdapter$ViewHolder {
+~ TextView itemName
+~ void bind(Item,OnItemClickListener)
+}
+
+
+class com.example.shopping_list.createGroup {
+- TextInputEditText groupNameEditText
+- Button addMembersButton
+- FirebaseAuth mAuth
+- DatabaseReference groupsDatabase
+- DatabaseReference groupsRef
+- ArrayList<String> membersList
+- String creatorId
+# void onCreate(Bundle)
+- void updateUserGroups(String,String)
+- void addMembers()
+- void createGroup()
+}
+
+
+class com.example.shopping_list.ProfileFragment {
+- {static} int PICK_IMAGE
+- ImageView profilePicture
+- TextInputEditText nameEditText
+- Button changePictureButton
+- FirebaseAuth auth
+- DatabaseReference userDatabaseRef
+- Uri imageUri
++ View onCreateView(LayoutInflater,ViewGroup,Bundle)
+- void loadUserData()
+- void openGallery()
++ void onActivityResult(int,int,Intent)
+- void saveUserData()
+}
+
+
+class com.example.shopping_list.Opening {
+- Button registerButton
+# void onCreate(Bundle)
+}
+
+
+class com.example.shopping_list.ShoppingList {
+- String shoppingListId
+- String groupId
+- List<Item> items
++ String getShoppingListId()
++ void setShoppingListId(String)
++ String getGroupId()
++ void setGroupId(String)
++ List<Item> getItems()
++ void setItems(List<Item>)
+}
+
+
+class com.example.shopping_list.MainActivity {
+# void onCreate(Bundle)
+- boolean loadFragment(Fragment)
+- void createNotificationChannel()
+}
+
+class com.example.shopping_list.User {
+- String userId
+- String fullName
+- String email
+- String password
+- String reminderTime
++ String getUserId()
++ void setUserId(String)
++ String getFullName()
++ void setFullName(String)
++ String getEmail()
++ void setEmail(String)
++ String getPassword()
++ void setPassword(String)
++ String getReminderTime()
++ void setReminderTime(String)
+}
+
+
+class com.example.shopping_list.Group {
+- String groupId
+- String name
+- String description
+- List<String> members
+- String creatorId
+- String shoppingListId
++ String getGroupId()
++ String getName()
++ String getDescription()
++ List<String> getMembers()
++ String getCreatorId()
++ String getShoppingListId()
+}
+
+
+class com.example.shopping_list.GroupsAdapter {
+- List<Group> groups
+- OnGroupClickListener listener
+- OnGroupLongClickListener longClickListener
++ void setOnGroupLongClickListener(OnGroupLongClickListener)
++ GroupViewHolder onCreateViewHolder(ViewGroup,int)
++ void onBindViewHolder(GroupViewHolder,int)
++ int getItemCount()
+}
+
+
+interface com.example.shopping_list.GroupsAdapter$OnGroupClickListener {
+~ void onGroupClick(Group)
+}
+
+interface com.example.shopping_list.GroupsAdapter$OnGroupLongClickListener {
+~ void onGroupLongClick(Group)
+}
+
+class com.example.shopping_list.GroupsAdapter$GroupViewHolder {
+~ TextView groupNameTextView
+}
+
+class com.example.shopping_list.ExampleUnitTest {
++ void addition_isCorrect()
+}
+
+class com.example.shopping_list.BootReceiver {
++ void onReceive(Context,Intent)
+}
+
+class com.example.shopping_list.ExampleInstrumentedTest {
++ void useAppContext()
+}
+
+class com.example.shopping_list.Item {
+- String name
+- int quantity
+- String remark
+- String key
++ String getName()
++ void setName(String)
++ int getQuantity()
++ void setQuantity(int)
++ String getRemark()
++ String getKey()
++ void setKey(String)
+}
+
+
+
+
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.SignUp
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.Login
+androidx.fragment.app.Fragment <|-- com.example.shopping_list.PricesFragment
+com.example.shopping_list.OnGroupClickListener <|.. com.example.shopping_list.groups
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.groups
+androidx.fragment.app.Fragment <|-- com.example.shopping_list.ShoppingListFragment
+android.content.BroadcastReceiver <|-- com.example.shopping_list.ReminderReceiver
+com.example.shopping_list.Adapter <|-- com.example.shopping_list.ShoppingListAdapter
+com.example.shopping_list.ShoppingListAdapter +.. com.example.shopping_list.ShoppingListAdapter$OnItemClickListener
+com.example.shopping_list.ShoppingListAdapter +.. com.example.shopping_list.ShoppingListAdapter$ViewHolder
+com.example.shopping_list.ViewHolder <|-- com.example.shopping_list.ShoppingListAdapter$ViewHolder
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.createGroup
+androidx.fragment.app.Fragment <|-- com.example.shopping_list.ProfileFragment
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.Opening
+androidx.appcompat.app.AppCompatActivity <|-- com.example.shopping_list.MainActivity
+com.example.shopping_list.Adapter <|-- com.example.shopping_list.GroupsAdapter
+com.example.shopping_list.GroupsAdapter +.. com.example.shopping_list.GroupsAdapter$OnGroupClickListener
+com.example.shopping_list.GroupsAdapter +.. com.example.shopping_list.GroupsAdapter$OnGroupLongClickListener
+com.example.shopping_list.GroupsAdapter +.. com.example.shopping_list.GroupsAdapter$GroupViewHolder
+com.example.shopping_list.ViewHolder <|-- com.example.shopping_list.GroupsAdapter$GroupViewHolder
+android.content.BroadcastReceiver <|-- com.example.shopping_list.BootReceiver
+@enduml
